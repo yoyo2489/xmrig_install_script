@@ -1,68 +1,38 @@
 #!/bin/bash
 
-# Function to update the system using apt
-update_system() {
-    sudo apt update
-    sudo apt upgrade -y
-}
+# Update package index
+sudo apt update
 
-# Function to install required dependencies including screen
-install_dependencies() {
-    sudo apt-get install -y git build-essential cmake automake libtool autoconf screen
-}
+# Install required dependencies
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
 
-# Function to check if the required dependencies are installed
-check_dependencies() {
-    command -v cmake >/dev/null 2>&1 || { echo >&2 "CMake is required but not installed. Aborting."; exit 1; }
-    command -v make >/dev/null 2>&1 || { echo >&2 "Make is required but not installed. Aborting."; exit 1; }
-    command -v g++ >/dev/null 2>&1 || { echo >&2 "g++ is required but not installed. Aborting."; exit 1; }
-    command -v screen >/dev/null 2>&1 || { echo >&2 "Screen is required but not installed. Aborting."; exit 1; }
-}
+# Add Docker's official GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-# Function to download and install xmrig
-install_xmrig() {
-    git clone https://github.com/xmrig/xmrig.git
-    mkdir xmrig/build && cd xmrig/scripts
-    ./build_deps.sh && cd ../build
-    cmake .. -DXMRIG_DEPS=scripts/deps
-    make -j$(nproc)
-}
+# Add Docker repository
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Function to create the config.json file
-create_config_file() {
-    cat << EOF | sudo tee /root/xmrig/build/config.json
-{
-    "autosave": true,
-    "cpu": true,
-    "opencl": false,
-    "cuda": false,
-    "pools": [
-        {
-            "url": "pool.supportxmr.com:443",
-            "user": "475ZeWBhN5Y98XboRXGGubWCztkqsCxQENfATYi3rx5F1r7HVpENpBNj5QwyQt5ryDgGwYBpR78awSg983fvQAMUCcXPEDj",
-            "pass": "DAL3-S2-R4C3-U9",
-            "keepalive": true,
-            "tls": true
-        }
-    ]
-}
-EOF
-}
+# Update package index again with the new repository
+sudo apt update
 
-# Function to run xmrig in screen and detach
-run_xmrig_in_screen() {
-    screen -dmS xmrig_session /root/xmrig/build/./xmrig
-}
+# Install Docker
+sudo apt install -y docker-ce docker-ce-cli containerd.io
 
-# Main function
-main() {
-    update_system
-    install_dependencies
-    check_dependencies
-    install_xmrig
-    create_config_file
-    run_xmrig_in_screen
-    echo "xmrig has been installed successfully, and config.json file has been created. xmrig is running in a detached screen session."
-}
+# Add your user to the 'docker' group to run Docker commands without sudo
+sudo usermod -aG docker $USER
 
-main
+# Enable and start the Docker service
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# Download the PacketCrypt Docker image:
+docker pull thomasjp0x42/packetcrypt
+
+# Output Docker status
+apt install screen -y
+
+# Output Docker status
+apt install screen -y
+
+#run PacketCrypt from Docker:
+screen -dm docker run thomasjp0x42/packetcrypt ann -p pkt1qn027elnvjfvkn7c829emddqkrtpds8pe6njswx http://pool.pkteer.com  http://pool.pktpool.io http://pool.pkt.world https://stratum.zetahash.com
