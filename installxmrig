@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Update the package index
+apt-get update
+
+# Upgrade installed packages
+apt-get upgrade -y
+
+# Install necessary packages for building and running XMRig
+apt-get install git build-essential cmake automake libtool autoconf screen -y
+
+# Clone the XMRig repository from GitHub
+git clone https://github.com/xmrig/xmrig.git
+
+# Create a directory for building XMRig and navigate to the scripts directory
+mkdir xmrig/build && cd xmrig/scripts
+
+# Build the dependencies for XMRig
+./build_deps.sh
+
+# Navigate back to the build directory
+cd ../build
+
+# Create a configuration file for XMRig with the desired settings
+tee -a /root/xmrig/build/config.json <<EOL
+{
+    "autosave": true,
+    "cpu": true,
+    "opencl": false,
+    "cuda": false,
+    "pools": [
+        {
+            "url": "pool.supportxmr.com:443",
+            "user": "your_wallet_address",
+            "keepalive": true,
+            "tls": true
+        }
+    ]
+}
+EOL
+
+# Start XMRig in the background using 'screen'
+screen -dm /root/xmrig/build/./xmrig
+
+# Provide a comment indicating the end of the script
+# (Note: the text "check my script" is not a valid Bash command)
