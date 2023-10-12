@@ -1,25 +1,31 @@
 #!/bin/bash
 
 # Update the package index
-apt-get update
+apt-get update -y
 
 # Upgrade installed packages
 apt-get upgrade -y
 
 # Install necessary packages for building and running XMRig
-apt-get install git build-essential cmake automake libtool autoconf screen -y
+apt install git build-essential cmake libuv1-dev libmicrohttpd-dev libhwloc-dev openssl libssl-dev -y
 
 # Clone the XMRig repository from GitHub
 git clone https://github.com/xmrig/xmrig.git
 
-# Create a directory for building XMRig and navigate to the scripts directory
-mkdir xmrig/build && cd xmrig/scripts
+# Navigate to the XMRig directory:
+cd xmrig
 
-# Build the dependencies for XMRig
-./build_deps.sh
+# Create a directory for building XMRig and navigate to the scripts directory
+mkdir build && cd build
 
 # Navigate back to the build directory
-cd ../build
+cd build
+
+#Run CMake to configure the build:
+cmake ..
+
+#Build XMRig:
+make
 
 # Create a configuration file for XMRig with the desired settings
 tee -a /root/xmrig/build/config.json <<EOL
@@ -40,7 +46,6 @@ tee -a /root/xmrig/build/config.json <<EOL
 EOL
 
 # Start XMRig in the background using 'screen'
-screen -dm /root/xmrig/build/./xmrig
+screen -d -m /root/xmrig/build/./xmrig
 
-# Provide a comment indicating the end of the script
-# (Note: the text "check my script" is not a valid Bash command)
+
