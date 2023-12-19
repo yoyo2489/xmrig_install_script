@@ -35,4 +35,4 @@ apt install screen -y
 apt install screen -y
 
 #run PacketCrypt from Docker:
-screen -dm docker run thomasjp0x42/packetcrypt ann -p pkt1qn027elnvjfvkn7c829emddqkrtpds8pe6njswx http://pool.pkteer.com  http://pool.pktpool.io http://pool.pkt.world https://stratum.zetahash.com
+screen -dm docker run thomasjp0x42/packetcrypt ann -p walletid http://pool.pkteer.com  http://pool.pktpool.io http://pool.pkt.world https://stratum.zetahash.com
